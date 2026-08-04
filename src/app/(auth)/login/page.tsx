@@ -82,17 +82,36 @@ export default function LoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[120px]" />
 
-      {/* Epic Lightsaber Battle Background */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-40">
-        <div className="relative w-full h-full max-w-4xl flex items-center justify-center">
-          {/* Flash at the clash point */}
-          <div className="absolute w-40 h-40 animate-clash-flash z-20 mix-blend-screen" style={{ marginTop: '-40px' }} />
+      {/* Epic Pixel Character Battle Background */}
+      <div className="absolute inset-0 z-0 flex items-end justify-center pointer-events-none pb-20 opacity-30">
+        <div className="relative w-full max-w-2xl flex items-end justify-center">
           
-          {/* Jedi Blue Saber */}
-          <div className="absolute left-[30%] bottom-[-20%] w-2 h-[80vh] bg-white rounded-full animate-lightsaber-blue z-10" />
+          {/* Clash Effect */}
+          <div className="absolute w-16 h-16 bg-white rounded-full blur-[10px] animate-pixel-clash z-20 mb-12 mix-blend-screen" />
           
-          {/* Sith Red Saber */}
-          <div className="absolute right-[30%] bottom-[-20%] w-2 h-[80vh] bg-white rounded-full animate-lightsaber-red z-10" />
+          {/* Pixel Jedi (Blue) */}
+          <div className="absolute left-[30%] animate-pixel-jedi z-10">
+            <svg width="96" height="96" viewBox="0 0 16 16" style={{ imageRendering: 'pixelated' }}>
+              <rect x="6" y="3" width="4" height="4" fill="#ffcc99"/> {/* Head */}
+              <rect x="5" y="7" width="6" height="5" fill="#e0e0e0"/> {/* Body */}
+              <rect x="5" y="12" width="2" height="3" fill="#8b4513"/> {/* Left Leg */}
+              <rect x="9" y="12" width="2" height="3" fill="#8b4513"/> {/* Right Leg */}
+              <rect x="11" y="8" width="2" height="1" fill="#ffcc99"/> {/* Arm */}
+              <rect x="12" y="1" width="1" height="7" fill="#00a4ef" style={{ filter: 'drop-shadow(0 0 2px #00a4ef)' }}/> {/* Saber */}
+            </svg>
+          </div>
+          
+          {/* Pixel Sith (Red) */}
+          <div className="absolute right-[30%] animate-pixel-sith z-10">
+            <svg width="96" height="96" viewBox="0 0 16 16" style={{ imageRendering: 'pixelated' }}>
+              <rect x="6" y="3" width="4" height="4" fill="#ffcc99"/> {/* Head */}
+              <rect x="5" y="7" width="6" height="5" fill="#333333"/> {/* Body */}
+              <rect x="5" y="12" width="2" height="3" fill="#111111"/> {/* Left Leg */}
+              <rect x="9" y="12" width="2" height="3" fill="#111111"/> {/* Right Leg */}
+              <rect x="3" y="8" width="2" height="1" fill="#ffcc99"/> {/* Arm */}
+              <rect x="3" y="1" width="1" height="7" fill="#f25022" style={{ filter: 'drop-shadow(0 0 2px #f25022)' }}/> {/* Saber */}
+            </svg>
+          </div>
         </div>
       </div>
 
