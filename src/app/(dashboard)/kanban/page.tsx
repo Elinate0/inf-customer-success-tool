@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useKanbanStore, TaskStatus, Task } from '@/store/useKanbanStore'
-import { Plus, GripVertical, AlertCircle } from 'lucide-react'
+import { Plus, GripVertical, AlertCircle, Loader2 } from 'lucide-react'
+import { NewTaskModal } from '@/components/modals/NewTaskModal'
 
 const columns: { id: TaskStatus; title: string; color: string }[] = [
   { id: 'backlog', title: 'Backlog', color: 'bg-gray-500/20 text-gray-300' },
@@ -20,8 +21,13 @@ const priorityColors = {
 }
 
 export default function KanbanPage() {
-  const { tasks, updateTaskStatus } = useKanbanStore()
+  const { tasks, loading, updateTaskStatus, fetchTasks } = useKanbanStore()
   const [draggedTask, setDraggedTask] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    fetchTasks()
+  }, [fetchTasks])
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     setDraggedTask(taskId)
@@ -51,13 +57,22 @@ export default function KanbanPage() {
           <h1 className="text-2xl font-bold text-white tracking-tight">Kanban Board</h1>
           <p className="text-gray-400 mt-1">Görevlerinizi sürükleyip bırakarak yönetin.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors text-sm font-medium">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors text-sm font-medium"
+        >
           <Plus size={16} />
           Yeni Görev
         </button>
       </div>
 
-      <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
+      {loading && tasks.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center text-gray-500">
+          <Loader2 size={24} className="animate-spin mr-2" />
+          <span>Görevler yükleniyor...</span>
+        </div>
+      ) : (
+        <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
         {columns.map((col) => {
           const colTasks = tasks.filter((t) => t.status === col.id)
           
@@ -108,6 +123,9 @@ export default function KanbanPage() {
           )
         })}
       </div>
+      )}
+
+      <NewTaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   )
 }

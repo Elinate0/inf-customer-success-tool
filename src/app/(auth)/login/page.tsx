@@ -66,6 +66,25 @@ export default function LoginPage() {
     }
   }
 
+  const handleMicrosoftLogin = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'azure',
+        options: {
+          scopes: 'email offline_access User.Read Mail.Read',
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      })
+      if (error) throw error
+    } catch (err: any) {
+      console.error("Microsoft Login Error: ", err)
+      setError(err.message || 'Microsoft ile giriş yapılamadı.')
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#0A0A0B]">
       {/* Dynamic Background Effects */}
@@ -153,6 +172,27 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          <div className="mt-6 flex items-center justify-center space-x-4">
+            <div className="h-px bg-white/10 flex-1"></div>
+            <span className="text-xs text-gray-500 font-medium">VEYA</span>
+            <div className="h-px bg-white/10 flex-1"></div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleMicrosoftLogin}
+            disabled={loading}
+            className="mt-6 w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-[#2F2F2F] hover:bg-[#3F3F3F] text-white border border-white/10 rounded-xl font-medium transition-all focus:ring-2 focus:ring-white/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 0H0V10H10V0Z" fill="#F25022"/>
+              <path d="M21 0H11V10H21V0Z" fill="#7FBA00"/>
+              <path d="M10 11H0V21H10V11Z" fill="#00A4EF"/>
+              <path d="M21 11H11V21H21V11Z" fill="#FFB900"/>
+            </svg>
+            Microsoft ile Giriş Yap (E-posta Eşitleme)
+          </button>
         </div>
         
         <div className="mt-8 text-center text-xs text-gray-500">

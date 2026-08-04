@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { createClient } from '@/lib/supabase/client'
 
 export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
@@ -11,38 +12,94 @@ export interface Task {
   priority: TaskPriority
   position: number
   customer_id?: string
+  created_at?: string
 }
 
 interface KanbanState {
   tasks: Task[]
-  setTasks: (tasks: Task[]) => void
-  addTask: (task: Task) => void
-  updateTaskStatus: (taskId: string, newStatus: TaskStatus) => void
-  moveTask: (taskId: string, newStatus: TaskStatus, newIndex: number) => void
+  loading: boolean
+  error: string | null
+  fetchTasks: () => Promise<void>
+  addTask: (task: Omit<Task, 'id' | 'position' | 'created_at'>) => Promise<void>
+  updateTaskStatus: (taskId: string, newStatus: TaskStatus) => Promise<void>
 }
 
-// Temporary Mock Data
-const mockTasks: Task[] = [
-  { id: '1', title: 'Onboarding Toplantısı (Acme Corp)', status: 'todo', priority: 'high', position: 0 },
-  { id: '2', title: 'Q3 Değerlendirme Raporu Hazırla', status: 'in_progress', priority: 'medium', position: 0 },
-  { id: '3', title: 'Fatura Entegrasyonu Sorunu', status: 'blocked', priority: 'urgent', position: 0 },
-  { id: '4', title: 'Yeni Kullanıcı Eğitimi (XYZ Ltd)', status: 'done', priority: 'medium', position: 0 },
-]
+const supabase = createClient()
 
-export const useKanbanStore = create<KanbanState>((set) => ({
-  tasks: mockTasks,
-  setTasks: (tasks) => set({ tasks }),
-  addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
-  updateTaskStatus: (taskId, newStatus) =>
+export const useKanbanStore = create<KanbanState>((set, get) => ({
+  tasks: [],
+  loading: false,
+  error: null,
+  
+  fetchTasks: async () => {
+    set({ loading: true, error: null })
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('position', { ascending: true })
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      set({ tasks: data || [], loading: false })
+    } catch (err: any) {
+      set({ error: err.message, loading: false })
+      console.error('Fetch tasks error:', err)
+    }
+  },
+
+  addTask: async (newTask) => {
+    set({ loading: true, error: null })
+    try {
+      const currentTasks = get().tasks
+      const tasksInSameStatus = currentTasks.filter(t => t.status === newTask.status)
+      const newPosition = tasksInSameStatus.length > 0 
+        ? Math.max(...tasksInSameStatus.map(t => t.position)) + 1 
+        : 0
+
+      const taskToInsert = {
+        ...newTask,
+        position: newPosition
+      }
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([taskToInsert])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      set((state) => ({
+        tasks: [...state.tasks, data],
+        loading: false
+      }))
+    } catch (err: any) {
+      set({ error: err.message, loading: false })
+      console.error('Add task error:', err)
+      throw err
+    }
+  },
+
+  updateTaskStatus: async (taskId, newStatus) => {
+    // Optimistic UI update
     set((state) => ({
       tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
-    })),
-  moveTask: (taskId, newStatus, newIndex) => {
-    set((state) => {
-      // Basic local state update for drag and drop (simplified for now without exact position calculation)
-      // Real implementation would calculate exact position numbers for Supabase order
-      const newTasks = state.tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t)
-      return { tasks: newTasks }
-    })
+    }))
+
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ status: newStatus })
+        .eq('id', taskId)
+
+      if (error) {
+        throw error
+      }
+    } catch (err: any) {
+      console.error('Update task status error:', err)
+      // Rollback could be implemented here if needed
+      await get().fetchTasks()
+    }
   }
 }))

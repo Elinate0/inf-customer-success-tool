@@ -1,10 +1,29 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useCustomerStore } from '@/store/useCustomerStore'
-import { Search, Plus, MoreHorizontal, Activity, AlertTriangle } from 'lucide-react'
+import { Search, Plus, MoreHorizontal, Activity, AlertTriangle, Loader2 } from 'lucide-react'
+import { NewCustomerModal } from '@/components/modals/NewCustomerModal'
 
 export default function CustomersPage() {
-  const { customers } = useCustomerStore()
+  const { customers, loading, fetchCustomers, syncEmailsWithMicrosoft } = useCustomerStore()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+
+  useEffect(() => {
+    fetchCustomers()
+  }, [fetchCustomers])
+
+  const handleSync = async () => {
+    setSyncing(true)
+    try {
+      await syncEmailsWithMicrosoft()
+    } catch (err: any) {
+      alert(err.message || 'Eşitleme sırasında bir hata oluştu.')
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -28,7 +47,10 @@ export default function CustomersPage() {
           <h1 className="text-2xl font-bold text-white tracking-tight">Müşteri Portföyü</h1>
           <p className="text-gray-400 mt-1">Müşterilerinizi ve dinamik sağlık skorlarını yönetin.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors text-sm font-medium">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors text-sm font-medium"
+        >
           <Plus size={16} />
           Yeni Müşteri
         </button>
@@ -46,9 +68,13 @@ export default function CustomersPage() {
           />
         </div>
         <div className="flex items-center gap-3">
-          <button className="px-4 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-xl text-sm font-medium hover:bg-white/10 transition-colors flex items-center gap-2">
-            <Activity size={16} />
-            Skorları Güncelle
+          <button 
+            onClick={handleSync}
+            disabled={syncing}
+            className="px-4 py-2 bg-[#2F2F2F] hover:bg-[#3F3F3F] border border-white/10 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+          >
+            {syncing ? <Loader2 size={16} className="animate-spin" /> : <Activity size={16} />}
+            {syncing ? 'Eşitleniyor...' : 'Mailleri Eşitle'}
           </button>
         </div>
       </div>
@@ -66,48 +92,65 @@ export default function CustomersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {customers.map((customer) => (
-                <tr key={customer.id} className="hover:bg-white/[0.02] transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/10 text-white font-medium">
-                        {customer.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-200">{customer.name}</div>
-                        <div className="text-gray-500 text-xs mt-0.5">{customer.company}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xl font-semibold tracking-tight ${getHealthColor(customer.health_score)}`}>
-                        {customer.health_score}
-                      </span>
-                      {customer.health_score < 50 && (
-                        <AlertTriangle size={14} className="text-red-400" />
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${getStatusColor(customer.status)}`}>
-                      {customer.status === 'active' ? 'Aktif' : customer.status === 'at_risk' ? 'Riskli' : 'Kayıp'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-400">
-                    {new Date(customer.last_contact_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-                      <MoreHorizontal size={18} />
-                    </button>
+              {loading && customers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    <Loader2 size={24} className="animate-spin mx-auto mb-2" />
+                    <p>Müşteriler yükleniyor...</p>
                   </td>
                 </tr>
-              ))}
+              ) : customers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    Henüz hiç müşteri eklenmemiş. "Yeni Müşteri" butonuna tıklayarak ilk müşterinizi ekleyin.
+                  </td>
+                </tr>
+              ) : (
+                customers.map((customer) => (
+                  <tr key={customer.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/10 text-white font-medium uppercase">
+                          {customer.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-200">{customer.name}</div>
+                          <div className="text-gray-500 text-xs mt-0.5">{customer.company}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xl font-semibold tracking-tight ${getHealthColor(customer.health_score)}`}>
+                          {customer.health_score}
+                        </span>
+                        {customer.health_score < 50 && (
+                          <AlertTriangle size={14} className="text-red-400" />
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${getStatusColor(customer.status)}`}>
+                        {customer.status === 'active' ? 'Aktif' : customer.status === 'at_risk' ? 'Riskli' : 'Kayıp'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-400">
+                      {customer.last_contact_date ? new Date(customer.last_contact_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button className="p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                        <MoreHorizontal size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      <NewCustomerModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   )
 }
