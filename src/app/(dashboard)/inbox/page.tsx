@@ -56,11 +56,9 @@ export default function InboxPage() {
 
   const handleCreateTaskFromAi = (taskTitle: string, priority: any) => {
     addTask({
-      id: Math.random().toString(36).substring(7),
       title: taskTitle,
       status: 'todo',
-      priority,
-      position: 0
+      priority
     })
     // Remove from extracted list
     setExtractedTasks(prev => prev.filter(t => t.title !== taskTitle))
