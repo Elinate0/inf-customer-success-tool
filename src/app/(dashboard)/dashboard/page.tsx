@@ -8,12 +8,22 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // MOCK DATA for Dashboard
+  const { data: customers } = await supabase.from('customers').select('*')
+  const { data: tasks } = await supabase.from('tasks').select('*')
+
+  const activeCustomersCount = customers?.filter(c => c.status === 'active').length || 0
+  const riskCustomersCount = customers?.filter(c => c.status === 'at_risk').length || 0
+  
+  const totalHealthScore = customers?.reduce((acc, curr) => acc + (curr.health_score || 0), 0) || 0
+  const avgHealthScore = customers?.length ? Math.round(totalHealthScore / customers.length) : 0
+
+  const completedTasksCount = tasks?.filter(t => t.status === 'done').length || 0
+
   const stats = [
-    { title: 'Aktif Müşteriler', value: '24', icon: Users, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { title: 'Riskli Müşteriler (Red Flag)', value: '3', icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-400/10' },
-    { title: 'Ort. Sağlık Skoru', value: '86', icon: Activity, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { title: 'Tamamlanan Görevler', value: '12', icon: CheckCircle2, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { title: 'Aktif Müşteriler', value: activeCustomersCount.toString(), icon: Users, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { title: 'Riskli Müşteriler (Red Flag)', value: riskCustomersCount.toString(), icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-400/10' },
+    { title: 'Ort. Sağlık Skoru', value: avgHealthScore.toString(), icon: Activity, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { title: 'Tamamlanan Görevler', value: completedTasksCount.toString(), icon: CheckCircle2, color: 'text-purple-400', bg: 'bg-purple-400/10' },
   ]
 
   return (
@@ -51,8 +61,19 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2 p-6 rounded-2xl bg-white/5 border border-white/10 h-80 flex items-center justify-center">
           <p className="text-gray-500 text-sm">Sağlık Skoru Trend Grafiği (Çok Yakında)</p>
         </div>
-        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 h-80 flex items-center justify-center">
-          <p className="text-gray-500 text-sm">Yaklaşan Görevler</p>
+        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 h-80 overflow-y-auto">
+          <h3 className="text-white font-medium mb-4">Yaklaşan Görevler</h3>
+          <div className="space-y-3">
+            {tasks?.filter(t => t.status !== 'done').slice(0, 5).map(task => (
+              <div key={task.id} className="p-3 bg-black/40 rounded-xl border border-white/5">
+                <p className="text-sm text-gray-200">{task.title}</p>
+                <p className="text-xs text-gray-500 mt-1 capitalize">{task.status}</p>
+              </div>
+            ))}
+            {(!tasks || tasks.filter(t => t.status !== 'done').length === 0) && (
+              <p className="text-sm text-gray-500 text-center py-4">Bekleyen görev yok.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
