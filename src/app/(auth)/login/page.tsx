@@ -11,6 +11,11 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  
+  // Debug env vars
+  const hasEnvUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+  const hasEnvKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
   const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -18,16 +23,25 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      console.log("Login attempt started...")
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      console.log("Supabase response:", { data, error })
 
-    if (error) {
-      setError('Geçersiz e-posta veya şifre.')
+      if (error) {
+        setError(error.message || 'Geçersiz e-posta veya şifre.')
+        setLoading(false)
+      } else {
+        console.log("Login success! Redirecting...")
+        window.location.href = '/dashboard'
+      }
+    } catch (err: any) {
+      console.error("Login Error: ", err)
+      setError(err.message || 'Beklenmeyen bir bağlantı hatası oluştu.')
       setLoading(false)
-    } else {
-      window.location.href = '/dashboard'
     }
   }
 
@@ -44,6 +58,13 @@ export default function LoginPage() {
               <Lock size={24} />
             </div>
             <h1 className="text-2xl font-semibold text-white tracking-tight">Komuta Merkezi</h1>
+            
+            {!hasEnvUrl && (
+              <div className="mt-4 p-3 bg-red-500/20 text-red-400 text-xs rounded-xl text-center w-full border border-red-500/30">
+                CRITICAL ERROR: Supabase URL Vercel'de eksik! Redeploy yapmalısınız.
+              </div>
+            )}
+            
             <p className="text-sm text-gray-400 mt-2 text-center">
               Müşteri Başarı yönetimi paneline giriş yapın
             </p>
