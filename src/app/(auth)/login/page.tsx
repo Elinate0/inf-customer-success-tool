@@ -44,11 +44,20 @@ export default function LoginPage() {
         setError(error.message || 'Geçersiz e-posta veya şifre.')
         setLoading(false)
       } else {
-        console.log("Login success! Redirecting...")
-        setSuccessMsg("Giriş Başarılı! Yönlendiriliyorsunuz...")
+        console.log("Login success! Checking cookies...")
+        setSuccessMsg("Giriş Başarılı! Çerezler kontrol ediliyor...")
+        
         setTimeout(() => {
-          window.location.href = '/dashboard'
-        }, 2000)
+          if (!document.cookie.includes('sb-')) {
+            setError("Kritik Hata: Tarayıcı çerezleri kaydetmeyi reddetti! (Gizli sekme veya çerez engelleyici açık olabilir)")
+            setSuccessMsg(null)
+          } else {
+            setSuccessMsg("Çerezler onaylandı! Yönlendiriliyorsunuz...")
+            setTimeout(() => {
+              window.location.href = '/dashboard'
+            }, 1000)
+          }
+        }, 1500)
       }
     } catch (err: any) {
       console.error("Login Error: ", err)
