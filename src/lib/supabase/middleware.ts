@@ -36,6 +36,7 @@ export async function updateSession(request: NextRequest) {
   // server. We should use getUser.
   const {
     data: { user },
+    error
   } = await supabase.auth.getUser()
 
   // Protect routes based on user session
@@ -46,6 +47,9 @@ export async function updateSession(request: NextRequest) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    if (error) {
+      url.searchParams.set('auth_error', error.message || 'unknown')
+    }
     return NextResponse.redirect(url)
   }
 
