@@ -48,7 +48,8 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     if (error) {
-      url.searchParams.set('auth_error', error.message || 'unknown')
+      const allCookies = request.cookies.getAll().map(c => c.name).join(',')
+      url.searchParams.set('auth_error', error.message + ' | ServerURL: ' + process.env.NEXT_PUBLIC_SUPABASE_URL + ' | ServerCookies: ' + allCookies)
     }
     return NextResponse.redirect(url)
   }
