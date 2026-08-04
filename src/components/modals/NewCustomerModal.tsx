@@ -26,7 +26,10 @@ export function NewCustomerModal({ isOpen, onClose }: NewCustomerModalProps) {
     setError(null)
     
     try {
-      await addCustomer(formData)
+      await addCustomer({ 
+        ...formData, 
+        last_contact_date: new Date().toISOString() 
+      })
       setFormData({ name: '', company: '', email: '' })
       onClose()
     } catch (err: any) {
