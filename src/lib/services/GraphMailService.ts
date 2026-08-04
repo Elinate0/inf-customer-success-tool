@@ -52,30 +52,13 @@ export class GraphMailService {
    * Son mailleri getirir.
    */
   async getRecentEmails(limit: number = 20): Promise<GraphEmail[]> {
-    // Skeleton: Gerçek entegrasyonda aktif edilecek.
-    // return this.fetchGraph(`/me/messages?$top=${limit}&$select=subject,sender,bodyPreview,body,receivedDateTime,isRead&$orderby=receivedDateTime DESC`)
-    
-    // MOCK DATA:
-    return [
-      {
-        id: 'msg_1',
-        subject: 'Acil: Sunucu Hatası Hakkında',
-        sender: { emailAddress: { name: 'Ahmet Yılmaz', address: 'ahmet@acme.com' } },
-        bodyPreview: 'Merhaba, bugün fatura kesme sayfasında sürekli bir sunucu hatası alıyoruz...',
-        body: { content: 'Merhaba, bugün fatura kesme sayfasında sürekli bir sunucu hatası alıyoruz. Acil destek rica ederim.', contentType: 'text' },
-        receivedDateTime: new Date().toISOString(),
-        isRead: false,
-      },
-      {
-        id: 'msg_2',
-        subject: 'Q3 Değerlendirme Toplantısı Notları',
-        sender: { emailAddress: { name: 'Ayşe Demir', address: 'ayse@xyz.com' } },
-        bodyPreview: 'Dünkü toplantıya katılımınız için teşekkürler. Notları ekte iletiyorum...',
-        body: { content: 'Dünkü toplantıya katılımınız için teşekkürler. Lütfen yeni kullanıcı eğitimleri için takvimi planlayalım.', contentType: 'text' },
-        receivedDateTime: new Date(Date.now() - 86400000).toISOString(),
-        isRead: true,
-      }
-    ]
+    try {
+      const data = await this.fetchGraph(`/me/messages?$top=${limit}&$select=subject,sender,bodyPreview,body,receivedDateTime,isRead&$orderby=receivedDateTime DESC`)
+      return data.value || []
+    } catch (err) {
+      console.error("GraphMailService getRecentEmails error:", err)
+      return []
+    }
   }
 
   /**

@@ -82,6 +82,20 @@ export default function LoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[120px]" />
 
+      {/* Epic Lightsaber Battle Background */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-40">
+        <div className="relative w-full h-full max-w-4xl flex items-center justify-center">
+          {/* Flash at the clash point */}
+          <div className="absolute w-40 h-40 animate-clash-flash z-20 mix-blend-screen" style={{ marginTop: '-40px' }} />
+          
+          {/* Jedi Blue Saber */}
+          <div className="absolute left-[30%] bottom-[-20%] w-2 h-[80vh] bg-white rounded-full animate-lightsaber-blue z-10" />
+          
+          {/* Sith Red Saber */}
+          <div className="absolute right-[30%] bottom-[-20%] w-2 h-[80vh] bg-white rounded-full animate-lightsaber-red z-10" />
+        </div>
+      </div>
+
       <div className="w-full max-w-md p-8 relative z-10">
         <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl">
           <div className="flex flex-col items-center mb-8">

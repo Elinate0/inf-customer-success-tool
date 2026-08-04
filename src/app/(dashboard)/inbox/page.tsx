@@ -19,8 +19,21 @@ export default function InboxPage() {
   const { addTask } = useKanbanStore()
 
   useEffect(() => {
-    // Load mock emails on mount
-    graphMailService.getRecentEmails().then(setEmails)
+    const fetchRealEmails = async () => {
+      try {
+        const token = localStorage.getItem('microsoft_provider_token')
+        if (!token) {
+          console.warn("No Microsoft token found. Please login with Microsoft.")
+          return
+        }
+        graphMailService.setToken(token)
+        const realEmails = await graphMailService.getRecentEmails()
+        setEmails(realEmails)
+      } catch (err) {
+        console.error("Failed to fetch inbox emails:", err)
+      }
+    }
+    fetchRealEmails()
   }, [])
 
   const handleSelectEmail = (email: GraphEmail) => {

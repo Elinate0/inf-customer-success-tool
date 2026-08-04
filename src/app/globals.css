@@ -36,3 +36,42 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+@keyframes lightsaber-blue {
+  0% { transform: rotate(30deg) translateY(200px); opacity: 0; }
+  20% { opacity: 1; box-shadow: 0 0 20px 5px rgba(0, 164, 239, 0.6); }
+  45% { transform: rotate(45deg) translateY(0px); box-shadow: 0 0 40px 15px rgba(0, 164, 239, 0.9); }
+  50% { transform: rotate(48deg) translateY(-10px); box-shadow: 0 0 60px 20px rgba(0, 164, 239, 1); }
+  55% { transform: rotate(45deg) translateY(0px); box-shadow: 0 0 40px 15px rgba(0, 164, 239, 0.9); }
+  80% { opacity: 1; }
+  100% { transform: rotate(30deg) translateY(200px); opacity: 0; }
+}
+
+@keyframes lightsaber-red {
+  0% { transform: rotate(-30deg) translateY(200px); opacity: 0; }
+  20% { opacity: 1; box-shadow: 0 0 20px 5px rgba(242, 80, 34, 0.6); }
+  45% { transform: rotate(-45deg) translateY(0px); box-shadow: 0 0 40px 15px rgba(242, 80, 34, 0.9); }
+  50% { transform: rotate(-48deg) translateY(-10px); box-shadow: 0 0 60px 20px rgba(242, 80, 34, 1); }
+  55% { transform: rotate(-45deg) translateY(0px); box-shadow: 0 0 40px 15px rgba(242, 80, 34, 0.9); }
+  80% { opacity: 1; }
+  100% { transform: rotate(-30deg) translateY(200px); opacity: 0; }
+}
+
+@keyframes clash-flash {
+  0%, 48% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(2); background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 70%); }
+  55%, 100% { opacity: 0; transform: scale(1); }
+}
+
+.animate-lightsaber-blue {
+  animation: lightsaber-blue 4s infinite ease-in-out;
+  transform-origin: bottom center;
+}
+.animate-lightsaber-red {
+  animation: lightsaber-red 4s infinite ease-in-out;
+  transform-origin: bottom center;
+}
+.animate-clash-flash {
+  animation: clash-flash 4s infinite ease-in-out;
+}
+
