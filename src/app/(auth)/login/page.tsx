@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const router = useRouter()
   
   // Debug env vars
@@ -36,7 +37,10 @@ export default function LoginPage() {
         setLoading(false)
       } else {
         console.log("Login success! Redirecting...")
-        window.location.href = '/dashboard'
+        setSuccessMsg("Giriş Başarılı! Yönlendiriliyorsunuz...")
+        setTimeout(() => {
+          window.location.href = '/dashboard'
+        }, 2000)
       }
     } catch (err: any) {
       console.error("Login Error: ", err)
@@ -108,6 +112,12 @@ export default function LoginPage() {
             {error && (
               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
                 <p className="text-sm text-red-400 text-center">{error}</p>
+              </div>
+            )}
+
+            {successMsg && (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <p className="text-sm text-emerald-400 text-center font-medium">{successMsg}</p>
               </div>
             )}
 
