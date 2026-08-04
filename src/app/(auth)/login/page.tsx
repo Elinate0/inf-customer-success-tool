@@ -12,15 +12,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const router = useRouter()
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const authError = params.get('auth_error')
-    if (authError) {
-      setError(`Sunucu Hatası (Middleware): ${authError}`)
-    }
-  }, [])
-  
   // Debug env vars
   const hasEnvUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL
   const hasEnvKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

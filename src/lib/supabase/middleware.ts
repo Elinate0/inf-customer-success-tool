@@ -72,10 +72,6 @@ export async function updateSession(request: NextRequest) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    if (error) {
-      const allCookies = request.cookies.getAll().map(c => c.name).join(',')
-      url.searchParams.set('auth_error', error.message + ' | ServerURL: ' + process.env.NEXT_PUBLIC_SUPABASE_URL + ' | ServerCookies: ' + allCookies)
-    }
     return NextResponse.redirect(url)
   }
 
