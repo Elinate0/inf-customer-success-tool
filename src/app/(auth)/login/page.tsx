@@ -27,8 +27,7 @@ export default function LoginPage() {
       setError('Geçersiz e-posta veya şifre.')
       setLoading(false)
     } else {
-      router.push('/')
-      router.refresh()
+      window.location.href = '/dashboard'
     }
   }
 
